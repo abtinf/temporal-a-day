@@ -58,11 +58,7 @@ func clientmain() {
 		log.Fatalln("unable to get Workflow result", err)
 	}
 
-	printResults(greeting, we.GetID(), we.GetRunID())
-}
-
-func printResults(greeting string, workflowID, runID string) {
-	fmt.Printf("\nWorkflowID: %s RunID: %s\n", workflowID, runID)
+	fmt.Printf("\nWorkflowID: %s RunID: %s\n", we.GetID(), we.GetRunID())
 	fmt.Printf("\n%s\n\n", greeting)
 }
 
