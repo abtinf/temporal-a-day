@@ -45,6 +45,22 @@ func GreetingWorkflow(ctx workflow.Context, name string) (string, error) {
 	return result, err
 }
 
+func workermain() {
+	c, err := client.Dial(client.Options{})
+	if err != nil {
+		log.Fatalf("worker failed to connect to server: %s", err)
+	}
+	defer c.Close()
+
+	w := worker.New(c, GreetingTaskQueue, worker.Options{})
+	w.RegisterWorkflow(GreetingWorkflow)
+	w.RegisterActivity(ComposeGreeting)
+
+	if err := w.Run(worker.InterruptCh()); err != nil {
+		log.Fatalf("failed to start worker: %s", err)
+	}
+}
+
 func clientmain() {
 	c, err := client.Dial(client.Options{})
 	if err != nil {
@@ -65,22 +81,6 @@ func clientmain() {
 	}
 
 	log.Printf("WorkflowID: %s RunID: %s Result: %s", run.GetID(), run.GetRunID(), result)
-}
-
-func workermain() {
-	c, err := client.Dial(client.Options{})
-	if err != nil {
-		log.Fatalf("worker failed to connect to server: %s", err)
-	}
-	defer c.Close()
-
-	w := worker.New(c, GreetingTaskQueue, worker.Options{})
-	w.RegisterWorkflow(GreetingWorkflow)
-	w.RegisterActivity(ComposeGreeting)
-
-	if err := w.Run(worker.InterruptCh()); err != nil {
-		log.Fatalf("failed to start worker: %s", err)
-	}
 }
 
 func servermain() {
