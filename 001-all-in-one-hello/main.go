@@ -99,9 +99,7 @@ func servermain() {
 		TemporalGRPCAddress: fmt.Sprintf("%s:%d", ip, port),
 		Host:                ip,
 		Port:                uiPort,
-		PublicPath:          "",
 		EnableUI:            true,
-		UIAssetPath:         "",
 		CORS:                uiconfig.CORS{CookieInsecure: true},
 		HideLogs:            true,
 	}))
