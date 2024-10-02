@@ -111,10 +111,6 @@ func servermain() {
 
 	conf := &config.Config{
 		Global: config.Global{
-			Membership: config.Membership{
-				MaxJoinDuration:  30 * time.Second,
-				BroadcastAddress: ip,
-			},
 			Metrics: &metrics.Config{
 				Prometheus: &metrics.PrometheusConfig{
 					ListenAddress: fmt.Sprintf("%s:%d", ip, metricsPort),
