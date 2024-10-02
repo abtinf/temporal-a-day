@@ -95,7 +95,6 @@ func servermain() {
 	namespace := "default"
 	clusterId := uuid.NewString()
 	clusterName := "active"
-	initialFailoverVersion := int64(1)
 
 	ui := uiserver.NewServer(uiserveroptions.WithConfigProvider(&uiconfig.Config{
 		TemporalGRPCAddress: fmt.Sprintf("%s:%d", ip, port),
@@ -151,7 +150,7 @@ func servermain() {
 			ClusterInformation: map[string]cluster.ClusterInformation{
 				clusterName: {
 					Enabled:                true,
-					InitialFailoverVersion: initialFailoverVersion,
+					InitialFailoverVersion: int64(1),
 					RPCAddress:             fmt.Sprintf("%s:%d", ip, port),
 					ClusterID:              clusterId,
 				},
