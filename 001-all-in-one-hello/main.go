@@ -92,7 +92,6 @@ func servermain() {
 	uiPort := port + 1000
 	metricsPort := uiPort + 1000
 	metricsPath := "/metrics"
-	pprofPort := 0
 	namespace := "default"
 	clusterId := uuid.NewString()
 	clusterName := "active"
@@ -125,9 +124,6 @@ func servermain() {
 					ListenAddress: fmt.Sprintf("%s:%d", ip, metricsPort),
 					HandlerPath:   metricsPath,
 				},
-			},
-			PProf: config.PProf{
-				Port: pprofPort,
 			},
 		},
 		Persistence: config.Persistence{
