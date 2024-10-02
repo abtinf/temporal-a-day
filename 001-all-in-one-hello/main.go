@@ -1,7 +1,7 @@
 package main
 
 func main() {
-	go devservermain()
+	go servermain()
 	go workermain()
 	go clientmain()
 	select {}
