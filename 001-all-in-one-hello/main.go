@@ -93,7 +93,6 @@ func servermain() {
 	metricsPort := uiPort + 1000
 	metricsPath := "/metrics"
 	namespace := "default"
-	clusterId := uuid.NewString()
 	clusterName := "active"
 
 	ui := uiserver.NewServer(uiserveroptions.WithConfigProvider(&uiconfig.Config{
@@ -152,7 +151,7 @@ func servermain() {
 					Enabled:                true,
 					InitialFailoverVersion: int64(1),
 					RPCAddress:             fmt.Sprintf("%s:%d", ip, port),
-					ClusterID:              clusterId,
+					ClusterID:              uuid.NewString(),
 				},
 			},
 		},
