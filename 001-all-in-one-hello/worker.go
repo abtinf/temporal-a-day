@@ -12,6 +12,7 @@ import (
 )
 
 const GreetingTaskQueue = "GREETING_TASK_QUEUE"
+const GreetingWorkflowID = "greeting-workflow"
 
 func ComposeGreeting(ctx context.Context, name string) (string, error) {
 	greeting := fmt.Sprintf("Hello %s!", name)
@@ -19,65 +20,46 @@ func ComposeGreeting(ctx context.Context, name string) (string, error) {
 }
 
 func GreetingWorkflow(ctx workflow.Context, name string) (string, error) {
-	options := workflow.ActivityOptions{
-		StartToCloseTimeout: time.Second * 5,
-	}
-
-	ctx = workflow.WithActivityOptions(ctx, options)
-
+	ctx = workflow.WithActivityOptions(ctx, workflow.ActivityOptions{StartToCloseTimeout: 5 * time.Second})
 	var result string
 	err := workflow.ExecuteActivity(ctx, ComposeGreeting, name).Get(ctx, &result)
-
 	return result, err
 }
 
 func clientmain() {
-	// Create the client object just once per process
 	c, err := client.Dial(client.Options{})
 	if err != nil {
-		log.Fatalln("unable to create Temporal client", err)
+		log.Fatalf("client failed to connect to server: %s", err)
 	}
 	defer c.Close()
 
-	options := client.StartWorkflowOptions{
-		ID:        "greeting-workflow",
-		TaskQueue: GreetingTaskQueue,
-	}
-
-	// Start the Workflow
 	name := "World"
-	we, err := c.ExecuteWorkflow(context.Background(), options, GreetingWorkflow, name)
+	run, err := c.ExecuteWorkflow(context.Background(), client.StartWorkflowOptions{ID: GreetingWorkflowID, TaskQueue: GreetingTaskQueue}, GreetingWorkflow, name)
 	if err != nil {
-		log.Fatalln("unable to complete Workflow", err)
+		log.Fatalf("workflow failed to complete: %s", err)
 	}
 
-	// Get the results
-	var greeting string
-	err = we.Get(context.Background(), &greeting)
+	var result string
+	err = run.Get(context.Background(), &result)
 	if err != nil {
-		log.Fatalln("unable to get Workflow result", err)
+		log.Fatalln("failed to get workflow result", err)
 	}
 
-	fmt.Printf("\nWorkflowID: %s RunID: %s\n", we.GetID(), we.GetRunID())
-	fmt.Printf("\n%s\n\n", greeting)
+	log.Printf("WorkflowID: %s RunID: %s Result: %s", run.GetID(), run.GetRunID(), result)
 }
 
 func workermain() {
-	// Create the client object just once per process
 	c, err := client.Dial(client.Options{})
 	if err != nil {
-		log.Fatalln("unable to create Temporal client", err)
+		log.Fatalf("worker failed to connect to server: %s", err)
 	}
 	defer c.Close()
 
-	// This worker hosts both Workflow and Activity functions
 	w := worker.New(c, GreetingTaskQueue, worker.Options{})
 	w.RegisterWorkflow(GreetingWorkflow)
 	w.RegisterActivity(ComposeGreeting)
 
-	// Start listening to the Task Queue
-	err = w.Run(worker.InterruptCh())
-	if err != nil {
-		log.Fatalln("unable to start Worker", err)
+	if err := w.Run(worker.InterruptCh()); err != nil {
+		log.Fatalf("failed to start worker: %s", err)
 	}
 }
