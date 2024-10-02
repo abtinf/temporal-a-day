@@ -222,11 +222,7 @@ func servermain() {
 	}
 
 	dynConf := make(dynamicconfig.StaticClient)
-	dynConf[dynamicconfig.HistoryCacheHostLevelMaxSize.Key()] = 8096
-	dynConf[dynamicconfig.FrontendMaxNamespaceVisibilityRPSPerInstance.Key()] = 100
 	dynConf[dynamicconfig.ForceSearchAttributesCacheRefreshOnRead.Key()] = true
-	dynConf[dynamicconfig.FrontendPersistenceMaxQPS.Key()] = 10000
-	dynConf[dynamicconfig.HistoryPersistenceMaxQPS.Key()] = 45000
 
 	server, err := temporal.NewServer(
 		temporal.WithConfig(conf),
